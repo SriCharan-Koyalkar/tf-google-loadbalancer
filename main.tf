@@ -1,9 +1,9 @@
-# ---------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 # LAUNCH A LOAD BALANCER WITH INSTANCE GROUP AND STORAGE BUCKET BACKEND
 #
 # This is an example of how to use the http-load-balancer module to deploy a HTTP load balancer
 # with multiple backends and optionally ssl and custom domain.  
-# ---------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
 
 terraform {
   # This module is now only being tested with Terraform 1.0.x. However, to make upgrading easier, we are setting
@@ -16,16 +16,12 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 3.43.0"
     }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = "~> 3.43.0"
-    }
   }
 }
 
-# ------------------------------------------------------------------------------
+# ------------------------------------------------
 # CONFIGURE OUR GCP CONNECTION
-# ------------------------------------------------------------------------------
+# ------------------------------------------------
 
 provider "google" {
   region  = var.region
@@ -37,9 +33,9 @@ provider "google-beta" {
   project = var.project
 }
 
-# ------------------------------------------------------------------------------
+# --------------------------------------------------
 # CREATE THE LOAD BALANCER
-# ------------------------------------------------------------------------------
+# --------------------------------------------------
 
 module "lb" {
   source                = "./modules/http-load-balancer"
@@ -57,9 +53,9 @@ module "lb" {
   custom_labels = var.custom_labels
 }
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------
 # CREATE THE URL MAP TO MAP PATHS TO BACKENDS
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------
 
 resource "google_compute_url_map" "urlmap" {
   project = var.project
@@ -85,9 +81,9 @@ resource "google_compute_url_map" "urlmap" {
   }
 }
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # CREATE THE BACKEND SERVICE CONFIGURATION FOR THE INSTANCE GROUP
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 resource "google_compute_backend_service" "api" {
   project = var.project
@@ -108,9 +104,9 @@ resource "google_compute_backend_service" "api" {
   depends_on = [google_compute_instance_group.api]
 }
 
-# ------------------------------------------------------------------------------
+# -------------------------------------------------------
 # CONFIGURE HEALTH CHECK FOR THE API BACKEND
-# ------------------------------------------------------------------------------
+# -------------------------------------------------------
 
 resource "google_compute_health_check" "default" {
   project = var.project
@@ -125,9 +121,9 @@ resource "google_compute_health_check" "default" {
   timeout_sec        = 5
 }
 
-# ------------------------------------------------------------------------------
+# -------------------------------------------------------
 # CREATE THE STORAGE BUCKET FOR THE STATIC CONTENT
-# ------------------------------------------------------------------------------
+# -------------------------------------------------------
 
 resource "google_storage_bucket" "static" {
   project = var.project
@@ -148,10 +144,9 @@ resource "google_storage_bucket" "static" {
   labels = var.custom_labels
 }
 
-# ------------------------------------------------------------------------------
+# ------------------------------------------------------
 # CREATE THE BACKEND FOR THE STORAGE BUCKET
-# ------------------------------------------------------------------------------
-
+# ------------------------------------------------------
 resource "google_compute_backend_bucket" "static" {
   project = var.project
 
@@ -159,9 +154,9 @@ resource "google_compute_backend_bucket" "static" {
   bucket_name = google_storage_bucket.static.name
 }
 
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------
 # UPLOAD SAMPLE CONTENT WITH PUBLIC READ ACCESS
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------
 
 resource "google_storage_default_object_acl" "website_acl" {
   bucket      = google_storage_bucket.static.name
@@ -186,9 +181,9 @@ resource "google_storage_bucket_object" "not_found" {
   depends_on = [google_storage_default_object_acl.website_acl]
 }
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------
 # IF SSL IS ENABLED, CREATE A SELF-SIGNED CERTIFICATE
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------------------
 
 resource "tls_self_signed_cert" "cert" {
   # Only create if SSL is enabled
@@ -217,9 +212,9 @@ resource "tls_private_key" "private_key" {
   ecdsa_curve = "P256"
 }
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # CREATE A CORRESPONDING GOOGLE CERTIFICATE THAT WE CAN ATTACH TO THE LOAD BALANCER
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 
 resource "google_compute_ssl_certificate" "certificate" {
   project = var.project
@@ -289,9 +284,9 @@ resource "google_compute_instance" "api" {
   }
 }
 
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------
 # CREATE A FIREWALL TO ALLOW ACCESS FROM THE LB TO THE INSTANCE
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------
 
 resource "google_compute_firewall" "firewall" {
   project = var.project

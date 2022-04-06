@@ -1,12 +1,9 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ===========================================================
 # DEPLOY A NETWORK LOAD BALANCER
 # This module deploys a GCP Regional Network Load Balancer
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ============================================================
 
 terraform {
-  # This module is now only being tested with Terraform 1.0.x. However, to make upgrading easier, we are setting
-  # 0.12.26 as the minimum version, as that version added support for required_providers with source URLs, making it
-  # forwards compatible with 1.0.x code.
   required_version = ">= 0.12.26"
 }
 
@@ -27,9 +24,9 @@ resource "google_compute_forwarding_rule" "default" {
   labels = var.custom_labels
 }
 
-# ------------------------------------------------------------------------------
+# ------------------------------------------
 # CREATE TARGET POOL
-# ------------------------------------------------------------------------------
+# ------------------------------------------
 
 resource "google_compute_target_pool" "default" {
   provider         = google-beta
@@ -43,9 +40,9 @@ resource "google_compute_target_pool" "default" {
   health_checks = google_compute_http_health_check.default.*.name
 }
 
-# ------------------------------------------------------------------------------
+# ------------------------------------
 # CREATE HEALTH CHECK
-# ------------------------------------------------------------------------------
+# ------------------------------------
 
 resource "google_compute_http_health_check" "default" {
   count = var.enable_health_check ? 1 : 0
@@ -61,9 +58,9 @@ resource "google_compute_http_health_check" "default" {
   timeout_sec         = var.health_check_timeout
 }
 
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------
 # CREATE FIREWALL FOR THE HEALTH CHECKS
-# ------------------------------------------------------------------------------
+# ---------------------------------------------------
 
 # Health check firewall allows ingress tcp traffic from the health check IP addresses
 resource "google_compute_firewall" "health_check" {
